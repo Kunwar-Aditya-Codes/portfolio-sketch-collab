@@ -5,22 +5,15 @@ import { useDraw } from '@/hooks/useDraw';
 import { drawLine } from '@/lib/utils';
 import { Boards, User } from '@prisma/client';
 import { useMutation } from '@tanstack/react-query';
+import { Wheel } from '@uiw/react-color';
 import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import AddCollaborators from './AddCollaborators';
 import { Button } from './ui/button';
-import {
-  Block,
-  Circle,
-  Compact,
-  Github,
-  Sketch,
-  Wheel,
-} from '@uiw/react-color';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://draw-backend-zo82.onrender.com');
 
 type DrawLineProps = {
   prevPoint: Point | null;
