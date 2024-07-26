@@ -7,7 +7,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: ['https://draw-frontend.onrender.com'],
+    origin: ['https://draw-dot-app.vercel.app/'],
   },
 });
 
