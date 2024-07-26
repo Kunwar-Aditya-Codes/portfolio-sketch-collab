@@ -24,7 +24,7 @@ export default function Home() {
                 Try the App
               </Link>
             </div>
-            <div className='flex justify-center  rounded-xl'>
+            <div className='flex justify-center rounded-xl'>
               <img
                 src='/hero-2.png'
                 width='600'
@@ -162,7 +162,15 @@ export default function Home() {
               </Link>
             </div>
             <p className='text-sm '>
-              &copy; 2024 Collaborative Drawing Board. All rights reserved.
+              &copy; 2024 Draw. Created By{' '}
+              <a
+                target='_blank'
+                className='underline underline-offset-2'
+                rel='noopener noreferrer'
+                href={'https://github.com/Kunwar-Aditya-Codes'}
+              >
+                Kunwar Aditya.
+              </a>
             </p>
           </div>
         </div>
