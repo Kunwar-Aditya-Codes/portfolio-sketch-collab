@@ -1,4 +1,5 @@
 import AddBoard from '@/components/AddBoard';
+import Signout from '@/components/Signout';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
@@ -19,14 +20,8 @@ export default async function Layout({
     <div className='bg-zinc-950 min-h-[100dvh] text-zinc-100 px-8 md:px-16 py-12'>
       <div className='flex items-center justify-between'>
         <h1 className='text-3xl'>Dashboard</h1>
-        <Link href={'/api/auth/logout'}>
-          <Button
-            className='bg-transparent border border-zinc-800 text-zinc-500 hover:bg-transparent hover:text-zinc-300 hover:border-zinc-500'
-            size={'sm'}
-          >
-            Logout
-          </Button>
-        </Link>
+
+        <Signout />
       </div>
       <div className='mt-10'>
         <div className='border-b border-b-zinc-800 flex  items-center justify-between pb-2'>

@@ -7,12 +7,7 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:3000',
-      'https://draw-frontend.onrender.com',
-      'https://draw-opal.vercel.app',
-      'https://draw-frontend-snowy.vercel.app',
-    ],
+    origin: ['https://draw-frontend.onrender.com'],
   },
 });
 
