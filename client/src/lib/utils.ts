@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from 'clsx';
+import { Metadata } from 'next';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -30,3 +31,27 @@ export const drawLine = ({
   ctx.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI);
   ctx.fill();
 };
+
+export function constructMetadata({
+  title = 'Draw - Collaborative Board',
+  description = 'Collaborate and start drawing easily.',
+  image = '/thumbnail.png',
+  icons = '/favicon.ico',
+}: {
+  title?: string;
+  description?: string;
+  image?: string;
+  icons?: string;
+} = {}): Metadata {
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: image }],
+    },
+    icons,
+    metadataBase: new URL('https://hello-app-one.vercel.app/'),
+  };
+}
