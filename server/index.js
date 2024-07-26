@@ -11,6 +11,7 @@ const io = new Server(server, {
       'http://localhost:3000',
       'https://draw-frontend.onrender.com',
       'https://draw-opal.vercel.app',
+      'https://draw-frontend-snowy.vercel.app',
     ],
   },
 });
