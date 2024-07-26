@@ -36,6 +36,6 @@ io.on('connection', (socket) => {
   socket.on('clear', (boardId) => io.to(boardId).emit('clear'));
 });
 
-server.listen(5000, () => {
+server.listen(process.env.PORT || 5000, () => {
   console.log('Server listening on port: 5000');
 });
