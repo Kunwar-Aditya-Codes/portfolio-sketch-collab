@@ -32,6 +32,19 @@ export const drawLine = ({
   ctx.fill();
 };
 
+export function throttle<T extends (...args: any[]) => void>(
+  func: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let lastCall = 0;
+  return function (...args: Parameters<T>) {
+    const now = new Date().getTime();
+    if (now - lastCall < delay) return;
+    lastCall = now;
+    return func(...args);
+  };
+}
+
 export function constructMetadata({
   title = 'Draw - Collaborative Board',
   description = 'Collaborate and start drawing easily.',

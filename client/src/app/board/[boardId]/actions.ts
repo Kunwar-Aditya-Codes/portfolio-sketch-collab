@@ -19,7 +19,9 @@ export const updateBoardImage = async ({
     },
   });
 
+  revalidatePath(`/board/${boardId}`);
   revalidatePath('/dashboard');
+
   return { success: true };
 };
 
@@ -49,6 +51,8 @@ export const addCollaborator = async ({
         userId: foundUser.id,
       },
     });
+
+    revalidatePath('/dashboard/collabs');
 
     return { success: true };
   } catch (error) {

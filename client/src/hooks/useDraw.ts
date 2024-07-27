@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 export const useDraw = (
-  onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void,
-  handleSave: () => void
+  onDraw: ({ ctx, currentPoint, prevPoint }: Draw) => void
 ) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const prevPoint = useRef<null | Point>(null);
@@ -18,8 +17,6 @@ export const useDraw = (
     if (!ctx) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    handleSave();
   };
 
   useEffect(() => {
@@ -46,11 +43,7 @@ export const useDraw = (
       if (!mouseDown) return;
       setMouseDown(false);
       prevPoint.current = null;
-      handleSave();
     };
-
-    // canvasRef.current?.addEventListener('mousemove', handler);
-    // window.addEventListener('mouseup', mouseUpHandler);
 
     const canvas = canvasRef.current;
     if (canvas) {
@@ -58,15 +51,12 @@ export const useDraw = (
       canvas.addEventListener('mouseup', mouseUpHandler);
     }
     return () => {
-      // canvasRef.current?.removeEventListener('mousemove', handler);
-      // window.removeEventListener('mouseup', mouseUpHandler);
-
       if (canvas) {
         canvas.removeEventListener('mousemove', handler);
         canvas.removeEventListener('mouseup', mouseUpHandler);
       }
     };
-  }, [onDraw, handleSave, mouseDown]);
+  }, [onDraw, mouseDown]);
 
   return { canvasRef, onMouseDown, clear };
 };

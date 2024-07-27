@@ -6,13 +6,14 @@ import { drawLine } from '@/lib/utils';
 import { Boards, User } from '@prisma/client';
 import { useMutation } from '@tanstack/react-query';
 import { Wheel } from '@uiw/react-color';
-import { ArrowLeft, Check, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, Save, TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import AddCollaborators from './AddCollaborators';
 import { Button } from './ui/button';
 
+// Use appropriate URL for your socket server
 const socket = io('https://draw-backend-zo82.onrender.com');
 
 type DrawLineProps = {
@@ -31,50 +32,59 @@ const DrawingBoard = ({
   collaboratedUsers: User[];
 }) => {
   const [color, setColor] = useState<string>('#ffffff');
-  const { canvasRef, onMouseDown, clear } = useDraw(createLine, handleSave);
+  const { canvasRef, onMouseDown, clear } = useDraw(createLine);
 
   const { mutate, isPending } = useMutation({
     mutationKey: ['update-image'],
     mutationFn: updateBoardImage,
   });
 
+  const saveImageToDatabase = () => {
+    const dataUrl = canvasRef.current?.toDataURL();
+    if (dataUrl) {
+      mutate({ boardId, imageUrl: dataUrl });
+    }
+  };
+
   useEffect(() => {
-    const ctx = canvasRef?.current?.getContext('2d');
+    const ctx = canvasRef.current?.getContext('2d');
 
     socket.emit('join-room', boardId);
     socket.emit('client-ready', boardId);
 
     socket.on('get-canvas-state', () => {
-      if (!canvasRef.current?.toDataURL()) return;
-      socket.emit('canvas-state', {
-        boardId,
-        state: canvasRef.current.toDataURL(),
-      });
+      const dataUrl = canvasRef.current?.toDataURL();
+      if (dataUrl) {
+        socket.emit('canvas-state', { boardId, state: dataUrl });
+      }
     });
 
     socket.on('canvas-state-from-server', (state) => {
       const img = new Image();
       img.src = state;
       img.onload = () => {
-        ctx?.clearRect(
-          0,
-          0,
-          canvasRef.current!.width,
-          canvasRef.current!.height
-        );
-        ctx?.drawImage(img, 0, 0);
+        if (ctx) {
+          ctx.clearRect(
+            0,
+            0,
+            canvasRef.current!.width,
+            canvasRef.current!.height
+          );
+          ctx.drawImage(img, 0, 0);
+        }
       };
     });
 
     socket.on(
       'draw-line',
       ({ color, currentPoint, prevPoint }: DrawLineProps) => {
-        if (!ctx) return;
-        drawLine({ prevPoint, currentPoint, color, ctx });
+        if (ctx) drawLine({ prevPoint, currentPoint, color, ctx });
       }
     );
 
-    socket.on('clear', clear);
+    socket.on('clear', () => {
+      clear();
+    });
 
     return () => {
       socket.off('get-canvas-state');
@@ -110,11 +120,6 @@ const DrawingBoard = ({
     }
   }, [board.image, canvasRef]);
 
-  function handleSave() {
-    const dataUrl = canvasRef.current?.toDataURL();
-    if (dataUrl) mutate({ boardId, imageUrl: dataUrl });
-  }
-
   function createLine({ prevPoint, currentPoint, ctx }: Draw) {
     socket.emit('draw-line', { boardId, prevPoint, currentPoint, color });
     drawLine({ prevPoint, color, ctx, currentPoint });
@@ -122,26 +127,35 @@ const DrawingBoard = ({
 
   return (
     <div className='overflow-hidden flex h-screen'>
-      <div className='w-[18rem] pr-10  flex flex-col gap-y-12  h-full p-4 top-4'>
-        <div className='flex items-center justify-between'>
-          <Link href={'/dashboard'}>
-            <Button className='bg-zinc-900 rounded-md ' size={'icon'}>
-              <ArrowLeft className='size-5' />
+      <div className='w-[18rem] pr-10 flex flex-col gap-y-8 h-full p-4 top-4'>
+        <div className='flex flex-col gap-y-4'>
+          <div className='flex items-center gap-x-4'>
+            <Link href={'/dashboard'}>
+              <Button className='bg-zinc-900 rounded-md' size={'icon'}>
+                <ArrowLeft className='size-5' />
+              </Button>
+            </Link>
+            <Button
+              onClick={saveImageToDatabase}
+              className='bg-zinc-900 rounded-md'
+              size={'icon'}
+            >
+              <Save className='size-5' />
             </Button>
-          </Link>
-          <div className='w-[6rem] flex items-center justify-center '>
+          </div>
+          <div className=' '>
             {isPending ? (
               <Loader2 className='size-5 animate-spin text-white' />
             ) : (
-              <span className='font-light italic text-zinc-400 flex items-center'>
-                Saved <Check className='size-5 ml-1' />
+              <span className='font-light  italic text-zinc-400 flex items-center'>
+                Last Saved at {board.updatedAt.toLocaleTimeString()}
               </span>
             )}
           </div>
         </div>
-        <div className='flex flex-col gap-y-12'>
+        <div className='flex flex-col gap-y-9'>
           <div>
-            <p className=' text-zinc-100 font-semibold'>Collaborators</p>
+            <p className='text-zinc-100 font-semibold'>Collaborators</p>
             <div className='mt-2.5'>
               {collaboratedUsers.map((user) => (
                 <p
@@ -155,7 +169,7 @@ const DrawingBoard = ({
           </div>
           <div>
             <p className='text-zinc-100 font-semibold'>Brush Color</p>
-            <div className='mt-2.5   flex items-center  object-contain'>
+            <div className='mt-2.5 flex items-center object-contain'>
               <Wheel
                 color={color}
                 width={150}
@@ -167,7 +181,7 @@ const DrawingBoard = ({
           </div>
           <div>
             <div className='flex items-center gap-x-2 mb-1'>
-              <p className=' text-zinc-100 font-semibold'>Actions</p>
+              <p className='text-zinc-100 font-semibold'>Actions</p>
             </div>
             <div className='mt-2 gap-y-2.5 flex flex-col'>
               <button
@@ -175,12 +189,18 @@ const DrawingBoard = ({
                   socket.emit('clear', boardId);
                   clear();
                 }}
-                className='border border-zinc-800  font-semibold py-2 px-3 w-full rounded-md text-sm'
+                className='border border-zinc-800 font-semibold py-2 px-3 w-full rounded-md text-sm'
               >
                 Clear
               </button>
               <AddCollaborators board={board} />
             </div>
+          </div>
+          <div className='bg-white text-zinc-950 p-2 rounded-md'>
+            <p className='text-sm font-semibold'>
+              <TriangleAlert className='size-5' />
+              Save before closing to prevent data loss.
+            </p>
           </div>
         </div>
       </div>
@@ -196,4 +216,5 @@ const DrawingBoard = ({
     </div>
   );
 };
+
 export default DrawingBoard;
